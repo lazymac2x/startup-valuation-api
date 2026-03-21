@@ -1,0 +1,304 @@
+openapi: 3.0.3
+info:
+  title: Startup Valuation API
+  version: 1.0.0
+  description: Premium startup & business valuation estimation API — multiple methodologies for VCs, founders, and finance professionals.
+  contact:
+    name: lazymac2x
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:5100
+    description: Local development
+
+paths:
+  /api/v1/industries:
+    get:
+      summary: List supported industries
+      operationId: listIndustries
+      tags: [Reference]
+      responses:
+        '200':
+          description: List of supported industries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  industries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        revenueMultipleRange:
+                          type: string
+                        medianGrowthRate:
+                          type: string
+                        medianSeedValuation:
+                          type: number
+
+  /api/v1/benchmarks/{industry}:
+    get:
+      summary: Get industry benchmark data
+      operationId: getBenchmarks
+      tags: [Reference]
+      parameters:
+        - name: industry
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [saas, fintech, ecommerce, ai_ml, healthcare, marketplace, gaming, crypto_web3]
+      responses:
+        '200':
+          description: Industry benchmark data
+        '404':
+          description: Industry not found
+
+  /api/v1/revenue-multiple:
+    post:
+      summary: Revenue Multiple valuation
+      operationId: revenueMultiple
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [annualRevenue, industry]
+              properties:
+                annualRevenue:
+                  type: number
+                  description: Annual revenue (ARR) in USD
+                  example: 5000000
+                industry:
+                  type: string
+                  description: Industry sector
+                  example: saas
+                growthRate:
+                  type: number
+                  description: Annual growth rate as decimal
+                  example: 0.5
+                grossMargin:
+                  type: number
+                  description: Gross margin as decimal
+                  example: 0.75
+                netRetention:
+                  type: number
+                  description: Net revenue retention as decimal
+                  example: 1.15
+      responses:
+        '200':
+          description: Valuation result
+        '400':
+          description: Invalid input
+
+  /api/v1/dcf:
+    post:
+      summary: Discounted Cash Flow analysis
+      operationId: dcfAnalysis
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentRevenue, growthRates, profitMargin]
+              properties:
+                currentRevenue:
+                  type: number
+                  example: 10000000
+                growthRates:
+                  description: Single rate or array of yearly rates
+                  example: 0.4
+                profitMargin:
+                  type: number
+                  example: 0.15
+                discountRate:
+                  type: number
+                  example: 0.25
+                terminalGrowthRate:
+                  type: number
+                  example: 0.03
+                projectionYears:
+                  type: integer
+                  example: 5
+                industry:
+                  type: string
+                  example: saas
+      responses:
+        '200':
+          description: DCF valuation result
+        '400':
+          description: Invalid input
+
+  /api/v1/scorecard:
+    post:
+      summary: Scorecard Method valuation
+      operationId: scorecardMethod
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [industry, scores]
+              properties:
+                industry:
+                  type: string
+                  example: fintech
+                region:
+                  type: string
+                  enum: [US, europe, asia, latam, other]
+                  example: US
+                scores:
+                  type: object
+                  description: "Scores from 0.0 to 2.0 (1.0 = average)"
+                  properties:
+                    team:
+                      type: number
+                      example: 1.5
+                    market:
+                      type: number
+                      example: 1.3
+                    product:
+                      type: number
+                      example: 1.2
+                    competition:
+                      type: number
+                      example: 0.8
+                    marketing:
+                      type: number
+                      example: 1.0
+                    needForInvestment:
+                      type: number
+                      example: 1.0
+                    other:
+                      type: number
+                      example: 1.0
+      responses:
+        '200':
+          description: Scorecard valuation result
+        '400':
+          description: Invalid input
+
+  /api/v1/berkus:
+    post:
+      summary: Berkus Method (pre-revenue)
+      operationId: berkusMethod
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                soundIdea:
+                  type: number
+                  description: Score 0.0-1.0
+                  example: 0.8
+                prototype:
+                  type: number
+                  example: 0.6
+                qualityTeam:
+                  type: number
+                  example: 0.9
+                strategicRelationships:
+                  type: number
+                  example: 0.4
+                productRollout:
+                  type: number
+                  example: 0.2
+                maxValuation:
+                  type: number
+                  description: Max possible valuation (default $2.5M)
+                  example: 2500000
+      responses:
+        '200':
+          description: Berkus valuation result
+
+  /api/v1/rule-of-40:
+    post:
+      summary: Rule of 40 SaaS health check
+      operationId: ruleOf40
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [annualRevenue, revenueGrowthRate, profitMargin]
+              properties:
+                annualRevenue:
+                  type: number
+                  example: 20000000
+                revenueGrowthRate:
+                  type: number
+                  example: 0.35
+                profitMargin:
+                  type: number
+                  example: 0.10
+                industry:
+                  type: string
+                  example: saas
+      responses:
+        '200':
+          description: Rule of 40 analysis
+
+  /api/v1/comprehensive:
+    post:
+      summary: Comprehensive valuation (all methods)
+      operationId: comprehensiveValuation
+      tags: [Valuation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [annualRevenue, industry]
+              properties:
+                annualRevenue:
+                  type: number
+                  example: 10000000
+                industry:
+                  type: string
+                  example: ai_ml
+                growthRate:
+                  type: number
+                  example: 0.6
+                profitMargin:
+                  type: number
+                  example: 0.15
+                grossMargin:
+                  type: number
+                  example: 0.75
+                netRetention:
+                  type: number
+                  example: 1.2
+                ebitda:
+                  type: number
+                  example: 1500000
+                stage:
+                  type: string
+                  example: series-a
+                region:
+                  type: string
+                  example: US
+                scores:
+                  type: object
+                berkusScores:
+                  type: object
+      responses:
+        '200':
+          description: Comprehensive valuation with all methods

@@ -1,0 +1,28 @@
+{
+  "name": "startup-valuation-api",
+  "version": "1.0.0",
+  "description": "Premium startup & business valuation estimation API — multiple methodologies for VCs, founders, and finance professionals",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "mcp": "node src/mcp-server.js"
+  },
+  "keywords": [
+    "startup",
+    "valuation",
+    "dcf",
+    "revenue-multiple",
+    "scorecard",
+    "berkus",
+    "venture-capital",
+    "finance",
+    "api"
+  ],
+  "author": "lazymac2x",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
